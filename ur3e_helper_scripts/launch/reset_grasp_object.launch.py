@@ -12,7 +12,7 @@ from launch.substitutions import LaunchConfiguration
 def generate_launch_description():
     # load moveit configs for the robot model
     # moveit_config = MoveItConfigsBuilder("name", package_name="sim_ur3e_config").to_moveit_configs()
-    moveit_config = MoveItConfigsBuilder("name", package_name="real_ur3e_config").to_moveit_configs()
+    moveit_config = MoveItConfigsBuilder("name", package_name="real_moveit_config").to_moveit_configs()
 
     # declare launch arguments
     declare_use_sim_time = DeclareLaunchArgument(name='use_sim_time', default_value='False',
