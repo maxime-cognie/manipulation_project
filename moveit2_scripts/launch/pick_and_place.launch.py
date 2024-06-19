@@ -10,7 +10,7 @@ def generate_launch_description():
         executable="pick_and_place",
         output="screen",
         parameters=[
-            {'use_sim_time': False},
+            {'use_sim_time': True},
         ],
     )
 
