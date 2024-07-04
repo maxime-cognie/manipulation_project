@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
   current_state_arm->copyJointGroupPositions(joint_model_group_arm,
                                              joint_group_positions_arm);
 
-  joint_group_positions_arm[0] += 3.1415; // Shoulder Pan
+  joint_group_positions_arm[0] += 3.0; // Shoulder Pan
 
   move_group_arm.setJointValueTarget(joint_group_positions_arm);
 
@@ -155,39 +155,39 @@ int main(int argc, char **argv) {
   move_group_arm.execute(my_plan_arm);
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-  // Place
-  RCLCPP_INFO(LOGGER, "Rotating Arm");
+//   // Place
+//   RCLCPP_INFO(LOGGER, "Rotating Arm");
 
-  current_state_arm = move_group_arm.getCurrentState(10);
-  current_state_arm->copyJointGroupPositions(joint_model_group_arm,
-                                             joint_group_positions_arm);
+//   current_state_arm = move_group_arm.getCurrentState(10);
+//   current_state_arm->copyJointGroupPositions(joint_model_group_arm,
+//                                              joint_group_positions_arm);
 
-  joint_group_positions_arm[0] -= 3.1415; // Shoulder Pan
+//   joint_group_positions_arm[0] -= 3.1415; // Shoulder Pan
 
-  move_group_arm.setJointValueTarget(joint_group_positions_arm);
+//   move_group_arm.setJointValueTarget(joint_group_positions_arm);
 
-  success_arm = (move_group_arm.plan(my_plan_arm) ==
-                 moveit::core::MoveItErrorCode::SUCCESS);
+//   success_arm = (move_group_arm.plan(my_plan_arm) ==
+//                  moveit::core::MoveItErrorCode::SUCCESS);
 
-  move_group_arm.execute(my_plan_arm);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//   move_group_arm.execute(my_plan_arm);
+//   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-  RCLCPP_INFO(LOGGER, "Releasing the block");
-  std::vector<geometry_msgs::msg::Pose> release_waypoints;
+//   RCLCPP_INFO(LOGGER, "Releasing the block");
+//   std::vector<geometry_msgs::msg::Pose> release_waypoints;
 
-  for (int i = 0; i < 4; i++){
-    target_pose.position.z -= 0.025;
-    release_waypoints.push_back(target_pose);
-  }
+//   for (int i = 0; i < 4; i++){
+//     target_pose.position.z -= 0.025;
+//     release_waypoints.push_back(target_pose);
+//   }
 
-  moveit_msgs::msg::RobotTrajectory trajectory_release;
+//   moveit_msgs::msg::RobotTrajectory trajectory_release;
 
-  fraction = move_group_arm.computeCartesianPath(
-      release_waypoints, eef_step, jump_threshold, trajectory_release);
+//   fraction = move_group_arm.computeCartesianPath(
+//       release_waypoints, eef_step, jump_threshold, trajectory_release);
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-  move_group_arm.execute(trajectory_release);
+//   move_group_arm.execute(trajectory_release);
 
   // Open Gripper
   RCLCPP_INFO(LOGGER, "Release Object!");
