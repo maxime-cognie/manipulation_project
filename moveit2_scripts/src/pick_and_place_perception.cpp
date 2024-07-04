@@ -114,7 +114,7 @@ private:
     RCLCPP_INFO(LOGGER, "Result received");
 
     for(auto obj : result.result->objects){
-      x_ = obj.object.primitive_poses[0].position.x + 0.01;
+      x_ = obj.object.primitive_poses[0].position.x + 0.012;
       y_ = obj.object.primitive_poses[0].position.y - 0.01;
       RCLCPP_INFO(LOGGER, "\nx: %f\ny: %f", x_, y_);
     }
@@ -277,7 +277,7 @@ private:
       // Close Gripper
       RCLCPP_INFO(rclcpp::get_logger("pick_and_place_node"), "Close Gripper!");
 
-      joint_group_positions_gripper[2] = 0.59; // Shoulder Pan
+      joint_group_positions_gripper[2] = 0.6; // Shoulder Pan
       move_group_gripper.setJointValueTarget(joint_group_positions_gripper);
       success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
                     moveit::core::MoveItErrorCode::SUCCESS);
@@ -287,7 +287,7 @@ private:
       current_state_gripper->copyJointGroupPositions(joint_model_group_gripper,
                                                  joint_group_positions_gripper);
 
-      while (joint_group_positions_gripper[2] < 0.61) {
+      while (joint_group_positions_gripper[2] <= 0.64) {
         joint_group_positions_gripper[2] += 0.005; // Shoulder Pan
         move_group_gripper.setJointValueTarget(joint_group_positions_gripper);
         success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
@@ -295,7 +295,12 @@ private:
         move_group_gripper.execute(my_plan_gripper);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      }      
+      }
+      joint_group_positions_gripper[2] += 0.0015; // Shoulder Pan
+      move_group_gripper.setJointValueTarget(joint_group_positions_gripper);
+      success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
+                   moveit::core::MoveItErrorCode::SUCCESS);
+      move_group_gripper.execute(my_plan_gripper);  
 
       // Retreat
       RCLCPP_INFO(rclcpp::get_logger("pick_and_place_node"), "Retreat from object!");
@@ -314,7 +319,7 @@ private:
           retreat_waypoints, eef_step, jump_threshold, trajectory_retreat);
 
       move_group_arm.execute(trajectory_retreat);
-
+      
       // Place
       RCLCPP_INFO(rclcpp::get_logger("pick_and_place_node"), "Rotating Arm");
 
@@ -367,158 +372,3 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return 0;
 }
-
-// static const rclcpp::Logger LOGGER = rclcpp::get_logger("pick_and_place");
-
-// int main(int argc, char **argv) {
-//   rclcpp::init(argc, argv);
-//   rclcpp::NodeOptions node_options;
-//   node_options.automatically_declare_parameters_from_overrides(true);
-//   auto move_group_node =
-//       rclcpp::Node::make_shared("pick_and_place_node", node_options);
-
-//   rclcpp::executors::SingleThreadedExecutor executor;
-//   executor.add_node(move_group_node);
-//   std::thread([&executor]() { executor.spin(); }).detach();
-
-//   static const std::string PLANNING_GROUP_ARM = "ur_manipulator";
-//   static const std::string PLANNING_GROUP_GRIPPER = "gripper";
-
-//   moveit::planning_interface::MoveGroupInterface move_group_arm(
-//       move_group_node, PLANNING_GROUP_ARM);
-//   moveit::planning_interface::MoveGroupInterface move_group_gripper(
-//       move_group_node, PLANNING_GROUP_GRIPPER);
-
-//   const moveit::core::JointModelGroup *joint_model_group_arm =
-//       move_group_arm.getCurrentState()->getJointModelGroup(PLANNING_GROUP_ARM);
-//   const moveit::core::JointModelGroup *joint_model_group_gripper =
-//       move_group_gripper.getCurrentState()->getJointModelGroup(
-//           PLANNING_GROUP_GRIPPER);
-
-//   // Get Current State
-//   moveit::core::RobotStatePtr current_state_arm =
-//       move_group_arm.getCurrentState(10);
-//   moveit::core::RobotStatePtr current_state_gripper =
-//       move_group_gripper.getCurrentState(10);
-
-//   std::vector<double> joint_group_positions_arm;
-//   std::vector<double> joint_group_positions_gripper;
-
-//   current_state_arm->copyJointGroupPositions(joint_model_group_arm,
-//                                              joint_group_positions_arm);
-//   current_state_gripper->copyJointGroupPositions(joint_model_group_gripper,
-//                                                  joint_group_positions_gripper);
-              
-//   move_group_arm.setStartStateToCurrentState();
-//   move_group_gripper.setStartStateToCurrentState();
-
-//   moveit::planning_interface::MoveGroupInterface::Plan my_plan_arm;
-//   moveit::planning_interface::MoveGroupInterface::Plan my_plan_gripper;
-
-//   bool success_arm;
-//   bool success_gripper;
-
-//   geometry_msgs::msg::Pose target_pose;
-
-//   move_group_arm.setNamedTarget("initial_pose");
-//   success_arm = (move_group_arm.plan(my_plan_arm) ==
-//                      moveit::core::MoveItErrorCode::SUCCESS);
-
-//   move_group_gripper.execute(my_plan_arm);
-
-//   // Pregrasp
-//   RCLCPP_INFO(LOGGER, "Pregrasp Position");
-
-//   target_pose.position.x = 0.343;
-//   target_pose.position.y = 0.132;
-//   target_pose.position.z = 0.25;
-//   target_pose.orientation.x = -1.0;
-//   target_pose.orientation.y = 0.0;
-//   target_pose.orientation.z = 0.0;
-//   target_pose.orientation.w = 0.0;
-
-//   move_group_arm.setPoseTarget(target_pose);
-//   success_arm = (move_group_arm.plan(my_plan_arm) ==
-//                      moveit::core::MoveItErrorCode::SUCCESS);
-
-//   // // Open Gripper
-//   // RCLCPP_INFO(LOGGER, "Open Gripper!");
-
-//   // move_group_gripper.setNamedTarget("open");
-
-//   // success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
-//   //                         moveit::core::MoveItErrorCode::SUCCESS);
-
-//   // move_group_gripper.execute(my_plan_gripper);
-
-//   // // Approach
-//   // RCLCPP_INFO(LOGGER, "Approach to object!");
-  
-//   // move_group_arm.setNamedTarget("grasp_pose"); 
-
-//   // success_arm = (move_group_arm.plan(my_plan_arm) ==
-//   //                moveit::core::MoveItErrorCode::SUCCESS);
-
-//   // move_group_arm.execute(my_plan_arm);
-
-// //   // Close Gripper
-// //   RCLCPP_INFO(LOGGER, "Close Gripper!");
-
-// //   move_group_gripper.setNamedTarget("close");
-
-// //   success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
-// //                      moveit::core::MoveItErrorCode::SUCCESS);
-
-// //   move_group_gripper.execute(my_plan_gripper);
-
-// //   // Retreat
-// //   RCLCPP_INFO(LOGGER, "Retreat from object!");
-// //   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-// //   move_group_arm.setNamedTarget("pre_grasp_pose"); 
-
-// //   success_arm = (move_group_arm.plan(my_plan_arm) ==
-// //                  moveit::core::MoveItErrorCode::SUCCESS);
-
-// //   move_group_arm.execute(my_plan_arm);
-
-// //   // Place
-// //   RCLCPP_INFO(LOGGER, "Rotating Arm");
-
-// //   current_state_arm = move_group_arm.getCurrentState(10);
-// //   current_state_arm->copyJointGroupPositions(joint_model_group_arm,
-// //                                              joint_group_positions_arm);
-
-// //   joint_group_positions_arm[0] += 3.1415; // Shoulder Pan
-
-// //   move_group_arm.setJointValueTarget(joint_group_positions_arm);
-
-// //   success_arm = (move_group_arm.plan(my_plan_arm) ==
-// //                  moveit::core::MoveItErrorCode::SUCCESS);
-
-// //   move_group_arm.execute(my_plan_arm);
-// //   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-// //   // Open Gripper
-// //   RCLCPP_INFO(LOGGER, "Release Object!");
-
-// //   move_group_gripper.setNamedTarget("open");
-
-// //   success_gripper = (move_group_gripper.plan(my_plan_gripper) ==
-// //                      moveit::core::MoveItErrorCode::SUCCESS);
-
-// //   move_group_gripper.execute(my_plan_gripper);
-
-// //   // Go back to arm initial position
-// //   RCLCPP_INFO(LOGGER, "Move back to initial position!");
-// //   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-// //   move_group_arm.setNamedTarget("initial_pose");
-
-// //   success_arm = (move_group_arm.plan(my_plan_arm) ==
-// //                      moveit::core::MoveItErrorCode::SUCCESS);
-
-// //   move_group_gripper.execute(my_plan_arm);
-
-//   rclcpp::shutdown();
-//   return 0;
-// }
